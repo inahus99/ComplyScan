@@ -10,8 +10,8 @@ const server = http.createServer(app);
 
 const allowedOrigins =
   process.env.NODE_ENV === 'production'
-    ? [process.env.FRONTEND_URL] // e.g. https://complyscan.example.com
-    : ['http://localhost:5173', 'http://localhost:1234']; // Vite/Parcel
+    ? [process.env.FRONTEND_URL] 
+    : ['http://localhost:5173', 'http://localhost:1234']; 
 
 app.use(cors({ origin: allowedOrigins, methods: ['GET','POST'], credentials: true }));
 
