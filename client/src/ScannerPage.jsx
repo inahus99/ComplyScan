@@ -54,7 +54,7 @@ ComplyScan
 );
 
 export default function ScannerPage() {
-  const [url, setUrl] = useState(""); // Removed default "https://x.com"
+  const [url, setUrl] = useState(""); 
   const [running, setRunning] = useState(false);
   const [progress, setProgress] = useState(0);
   const [logs, setLogs] = useState([]);

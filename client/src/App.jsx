@@ -17,7 +17,7 @@ function AppShell() {
           <Route path="/scan" element={<ScannerPage />} />
         </Routes>
       </div>
-      {/* fixed + transparent on landing, normal on others */}
+    
       <Footer fixed={isLanding} blend={isLanding} />
     </div>
   );

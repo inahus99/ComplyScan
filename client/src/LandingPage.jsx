@@ -158,7 +158,7 @@ export default function LandingPage() {
             </Group>
           </MotionDiv>
 
-          {/* NEW: How it works (replaces the old sample box) */}
+      
           <MotionDiv
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
@@ -169,13 +169,13 @@ export default function LandingPage() {
               <HowCard
                 emoji="🔗"
                 title="1. Paste a URL"
-                desc="Enter any public site. No install needed — we crawl a few pages automatically."
+                desc="Enter any public site. No install needed. We crawl a few pages automatically."
                 gradient="linear-gradient(135deg,#22c55e,#14b8a6)"
               />
               <HowCard
                 emoji="🛡️"
                 title="2. We detect issues"
-                desc="Consent banners, 3P trackers, cookie lifetimes, policy links — all checked."
+                desc="Consent banners, third-party trackers, cookie lifetimes, and policy links are all checked."
                 gradient="linear-gradient(135deg,#06b6d4,#6366f1)"
               />
               <HowCard

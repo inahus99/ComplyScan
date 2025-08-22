@@ -24,7 +24,7 @@ export default function LandingNav() {
             underline="never"
             style={{ textDecoration: "none" }}
           >
-            {/* Gradient updated to match your image */}
+            {/* Gradient updated to match  image */}
             <Text
               size="xl"
               fw={900}
