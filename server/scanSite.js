@@ -1,8 +1,54 @@
 const puppeteer = require("puppeteer");
 const { URL } = require("url");
 
+const MS_PER_DAY = 24 * 3600 * 1000;
+
 function pct(n, d) {
   return Math.round((n / Math.max(d, 1)) * 100);
+}
+
+function guessPurpose(name, domain) {
+  const n = (name || "").toLowerCase();
+  const d = (domain || "").toLowerCase();
+  const rules = [
+    { rx: /^_ga(_.*)?$|^_gid$|^_gat$/, purpose: "Analytics (Google Analytics)" },
+    { rx: /^_gcl_au$/,                 purpose: "Ads/Attribution (Google Ads)" },
+    { rx: /^_fbp$|^fr$/,               purpose: "Ads/Retargeting (Facebook)" },
+    { rx: /^ajs_/,                     purpose: "Analytics (Segment)" },
+    { rx: /^amplitude_/,               purpose: "Analytics (Amplitude)" },
+    { rx: /^mp_.*_mixpanel$|^mixpanel$/, purpose: "Analytics (Mixpanel)" },
+    { rx: /^_hj/,                      purpose: "Analytics (Hotjar)" },
+    { rx: /^_clck$|^_clsk$/,           purpose: "Analytics (Microsoft Clarity)" },
+    { rx: /^cid$|^scid$/,              purpose: "Analytics/Attribution" },
+    { rx: /^session$|^sid$|^ssid$|^sessionid$|^connect\.sid$/, purpose: "Session / Auth" },
+    { rx: /^__stripe/,                 purpose: "Payments (Stripe)" },
+    { rx: /^twid$|^guest_id$|^ct0$/,   purpose: "Platform (Twitter/X)" },
+  ];
+  for (const r of rules) if (r.rx.test(n)) return r.purpose;
+  if (d.includes("doubleclick.net")) return "Ads (DoubleClick)";
+  if (d.includes("google"))          return "Google Services";
+  if (d.includes("facebook"))        return "Facebook Services";
+  if (d.includes("twitter") || d.includes("t.co")) return "Twitter Services";
+  return "Unclassified / Unknown";
+}
+
+function toCookieRow(c, originHost) {
+  const now = Date.now();
+  const expiresAt = c.expires ? c.expires * 1000 : null;
+  const lifetimeDays = expiresAt ? Math.max(0, Math.round((expiresAt - now) / MS_PER_DAY)) : null;
+  const firstParty = !c.domain || c.domain.replace(/^\./, "") === originHost;
+  return {
+    name: c.name,
+    domain: c.domain || originHost,
+    path: c.path || "/",
+    sameSite: c.sameSite || "unspecified",
+    secure: !!c.secure,
+    httpOnly: !!c.httpOnly,
+    firstParty,
+    purpose: guessPurpose(c.name, c.domain),
+    expiresAt,
+    lifetimeDays
+  };
 }
 
 async function scanSite({ url, socket, options = {} }) {
@@ -39,6 +85,7 @@ async function scanSite({ url, socket, options = {} }) {
     scannedPages: [],
     thirdPartyRequests: new Set(),
     cookies: [],
+    cookieReport: [],   // <-- new detailed cookie table
     consentBannerDetected: false,
     privacyPolicyFound: false,
     violations: [],
@@ -64,7 +111,7 @@ async function scanSite({ url, socket, options = {} }) {
       const page = await browser.newPage();
       page.setDefaultNavigationTimeout(navigationTimeoutMs);
 
-      // Track third‑party hosts during navigation
+      // Track third-party hosts during navigation
       const pageThirdParty = new Set();
       page.on("request", req => {
         try {
@@ -113,19 +160,27 @@ async function scanSite({ url, socket, options = {} }) {
       });
       if (privacyFound) result.privacyPolicyFound = true;
 
-      // Cookies set so far
-      const cookies = await page.cookies();
-      cookies.forEach(c => result.cookies.push(c));
+      // --- All cookies (whole browser session, not just first-party) ---
+      const cdp = await page.target().createCDPSession();
+      await cdp.send("Network.enable");
+      const { cookies: allCookies } = await cdp.send("Network.getAllCookies");
 
-      // Store third‑party hosts
+      // keep legacy array (for scoring)
+      allCookies.forEach(c => result.cookies.push(c));
+
+      // normalized rows for the UI table
+      const rows = allCookies.map(c => toCookieRow(c, originHost));
+      result.cookieReport.push(...rows);
+
+      // Store third-party hosts
       pageThirdParty.forEach(h => result.thirdPartyRequests.add(h));
       socket.emit("page_done", {
         page: target,
-        cookiesFound: cookies.length,
+        cookiesFound: allCookies.length,
         thirdPartiesFound: pageThirdParty.size
       });
 
-      /* ---------- Discover same‑origin links ---------- */
+      /* ---------- Discover same-origin links ---------- */
       if (pageCount < maxPages) {
         try {
           const links = await page.evaluate(origin => {
@@ -168,7 +223,7 @@ async function scanSite({ url, socket, options = {} }) {
     const hasAnalytics = analyticsCookies.some(n => cookieSet.has(n));
 
     if (!result.consentBannerDetected && (thirdPartyArr.length || hasAnalytics)) {
-      result.violations.push("No visible consent banner despite third‑party activity.");
+      result.violations.push("No visible consent banner despite third-party activity.");
       result.tips.push("Show a cookie/consent banner before loading analytics or ads.");
       result.score -= 30;
     }
@@ -178,23 +233,25 @@ async function scanSite({ url, socket, options = {} }) {
       result.score -= 20;
     }
 
-    const longLived = result.cookies.filter(c => c.expires && (c.expires*1000 - Date.now()) > 365*24*3600*1000);
+    const longLived = result.cookieReport.filter(r => (r.lifetimeDays ?? 0) > 365);
     if (longLived.length) {
-      result.violations.push(`Found ${longLived.length} cookie(s) lasting > 1 year.`);
-      result.tips.push("Shorten lifetimes of non‑essential cookies.");
+      result.violations.push(`Found ${longLived.length} cookie(s) lasting > 1 year.`);
+      result.tips.push("Shorten lifetimes of non-essential cookies.");
       result.score -= 10;
     }
     if (result.score < 0) result.score = 0;
 
     result.thirdPartyRequests = thirdPartyArr;
+
+    socket.emit('scan_result', result);
     socket.emit('scan_complete', result);
 
   } catch (err) {
-    // Surface any fatal error to the client
     socket.emit('scan_error', { message: err.message });
     throw err;
   } finally {
-    await browser.close().catch(() => {});
+    try { await browser.close(); } catch {}
+    socket.emit('scan_done');
   }
 }
 
