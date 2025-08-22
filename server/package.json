@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
 "start": "node index.js",
-
+    "postinstall": "npx puppeteer browsers install chrome",
     "dev": "nodemon index.js"
   },
   "dependencies": {
