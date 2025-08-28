@@ -85,7 +85,7 @@ async function scanSite({ url, socket, options = {} }) {
     scannedPages: [],
     thirdPartyRequests: new Set(),
     cookies: [],
-    cookieReport: [],   // <-- new detailed cookie table
+    cookieReport: [],   //  detailed cookie table
     consentBannerDetected: false,
     privacyPolicyFound: false,
     violations: [],
@@ -160,12 +160,12 @@ async function scanSite({ url, socket, options = {} }) {
       });
       if (privacyFound) result.privacyPolicyFound = true;
 
-      // --- All cookies (whole browser session, not just first-party) ---
+      // --- All cookies (whole browser session) ---
       const cdp = await page.target().createCDPSession();
       await cdp.send("Network.enable");
       const { cookies: allCookies } = await cdp.send("Network.getAllCookies");
 
-      // keep legacy array (for scoring)
+ 
       allCookies.forEach(c => result.cookies.push(c));
 
       // normalized rows for the UI table
