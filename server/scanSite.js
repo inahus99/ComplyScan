@@ -69,7 +69,7 @@ async function scanSite({ url, socket, options = {} }) {
 
   const browser = await puppeteer.launch({
     headless: true,
-    executablePath,           // undefined → Puppeteer default
+    executablePath,           
     args: ["--no-sandbox", "--disable-setuid-sandbox"],
     timeout: navigationTimeoutMs
   });
@@ -85,7 +85,7 @@ async function scanSite({ url, socket, options = {} }) {
     scannedPages: [],
     thirdPartyRequests: new Set(),
     cookies: [],
-    cookieReport: [],   //  detailed cookie table
+    cookieReport: [],   
     consentBannerDetected: false,
     privacyPolicyFound: false,
     violations: [],
@@ -129,8 +129,7 @@ async function scanSite({ url, socket, options = {} }) {
         continue;
       }
 
-      /* ---------- Heuristics ---------- */
-      // Consent banner present?
+      // Consent banner present
       const bannerInfo = await page.evaluate(() => {
         const nodes = Array.from(
           document.querySelectorAll("[id*='cookie'],[class*='cookie'],[id*='consent'],[class*='consent']")
@@ -213,7 +212,7 @@ async function scanSite({ url, socket, options = {} }) {
       });
     }
 
-    /* ---------- Final scoring ---------- */
+    /* ----------  scoring ---------- */
     const thirdPartyArr = Array.from(result.thirdPartyRequests);
     const cookieSet = new Set(result.cookies.map(c => c.name.toLowerCase()));
     const analyticsCookies = [
