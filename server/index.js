@@ -19,7 +19,7 @@ app.get('/health', (_req, res) => res.json({ ok: true, env: process.env.NODE_ENV
 
 const io = new Server(server, {
   path: '/socket.io',
-  transports: ['websocket'],     // force WS (no silent polling fallback)
+  transports: ['websocket'],     
   cors: { origin: allowedOrigins, methods: ['GET','POST'], credentials: true },
   pingInterval: 25000,
   pingTimeout: 60000

@@ -1,42 +1,43 @@
 import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { socket, on } from "./lib/socket.js";
 import { Link } from "react-router-dom";
-/* ====== Style Constants & Helpers ====== */
-const colors = {
-  primary: "#007aff",
-  green: "#34c759",
-  red: "#ff3b30",
-  blue: "#007aff",
-  dark: "#1c1c1e",
-  lightGray: "#f2f2f7",
-  border: "#e5e5ea",
-  text: "#333",
-  textSecondary: "#6b7280",
-};
-
-const btn = (disabled, accent = colors.primary) => ({
-  padding: "10px 18px",
-  borderRadius: "8px",
-  color: "#fff",
-  background: disabled ? "#9aa3a9" : accent,
-  cursor: disabled ? "not-allowed" : "pointer",
-  border: "none",
-  fontWeight: 600,
-  fontSize: "15px",
-  transition: "background 0.2s ease, transform 0.1s ease",
-  outline: "none",
-});
-
-const card = {
-  border: `1px solid ${colors.border}`,
-  borderRadius: "12px",
-  padding: "16px",
-  background: "#fff",
-  boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05)",
-};
-
-const td = { padding: "12px 14px", borderBottom: `1px solid ${colors.border}`, verticalAlign: "top", fontSize: "13px" };
-const th = { ...td, fontWeight: 600, position: "sticky", top: 0, background: colors.lightGray, zIndex: 1 };
+import html2canvas from "html2canvas";
+import { jsPDF } from "jspdf";
+import {
+  Container,
+  Title,
+  Text,
+  TextInput,
+  Button,
+  Group,
+  Stack,
+  Card,
+  Paper,
+  Progress,
+  RingProgress,
+  Table,
+  Badge,
+  ScrollArea,
+  Box,
+  Grid,
+  ThemeIcon,
+  Alert,
+  Modal,
+  Code
+} from "@mantine/core";
+import { 
+  IconArrowLeft, 
+  IconDownload, 
+  IconScan, 
+  IconAlertCircle, 
+  IconCheck, 
+  IconSearch, 
+  IconChevronUp,
+  IconChevronDown,
+  IconSelector,
+  IconDeviceFloppy,
+  IconCodeAsterisk
+} from "@tabler/icons-react";
 
 const Watermark = () => (
   <div style={{
@@ -49,7 +50,7 @@ const Watermark = () => (
     fontWeight: '600',
     pointerEvents: 'none',
   }}>
-ComplyScan
+    ComplyScan
   </div>
 );
 
@@ -142,156 +143,391 @@ export default function ScannerPage() {
     URL.revokeObjectURL(a.href);
   }
 
+  // Feature 1: Export PDF Report
+  const exportPDF = async () => {
+    if (!result) return;
+    const element = document.getElementById("report-container");
+    if (!element) return;
+    
+    try {
+      pushLog("Generating PDF document...");
+      const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+      const imgData = canvas.toDataURL("image/png");
+      
+      const pdf = new jsPDF("p", "mm", "a4");
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`ComplyScan-Report-${new URL(result.site).host}.pdf`);
+      pushLog("PDF downloaded successfully.");
+    } catch (e) {
+      pushLog("PDF Generation failed: " + e.message);
+    }
+  };
+
   return (
-    <div style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif", background: colors.lightGray, minHeight: '100vh', position: 'relative' }}>
-        <div style={{ maxWidth: 1280, margin: "0 auto", padding: "24px 16px" }}>
+    <Box 
+      style={{ 
+        background: "#f8f9fa", 
+        minHeight: '100vh', 
+        position: 'relative',
+        paddingTop: "24px",
+        paddingBottom: "64px" 
+      }}
+    >
+      <Container size="xl">
         <Watermark />
-        <header style={{ textAlign: "center", marginBottom: "24px" }}>
-          <div style={{ marginBottom: 12 }}>
-  <Link
-    to="/"
-    style={{
-      display: "inline-flex",
-      alignItems: "center",
-      gap: 6,
-      fontSize: 14,
-      color: "#2563eb",
-      textDecoration: "none",
-      fontWeight: 600,
-    }}
-  >
-    ← Back to Home
-  </Link>
-</div>
 
-            <h1 style={{ fontSize: "36px", fontWeight: 800, color: colors.dark, margin: 0 }}>ComplyScan</h1>
-            <p style={{ color: colors.textSecondary, marginTop: '4px' }}>Enter a URL to analyze its privacy compliance.</p>
-        </header>
+        {/* Header */}
+        <Stack align="center" mb={32}>
+          <Button
+            component={Link}
+            to="/"
+            variant="subtle"
+            color="gray"
+            size="sm"
+            leftSection={<IconArrowLeft size={16} />}
+            mb={-10}
+          >
+            Back to Home
+          </Button>
+          <Title order={1} fw={900} lts={-1} fz={40} style={{ color: "#1e293b" }}>
+            ComplyScan
+          </Title>
+          <Text c="dimmed" size="lg" mt={-8}>
+            Enter a URL to analyze its privacy compliance.
+          </Text>
+        </Stack>
 
-        <div style={{ display: "flex", gap: "8px", marginBottom: "16px", ...card, padding: '16px' }}>
-          <input
-            style={{
-              flex: 1,
-              padding: "12px 14px",
-              border: `1px solid ${colors.border}`,
-              borderRadius: "8px",
-              outline: "none",
-              fontSize: "16px",
-              transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
-            }}
-            onFocus={(e) => { e.target.style.borderColor = colors.primary; e.target.style.boxShadow = `0 0 0 2px ${colors.primary}40` }}
-            onBlur={(e) => { e.target.style.borderColor = colors.border; e.target.style.boxShadow = 'none' }}
-            placeholder="e.g., https://example.com"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
+        {/* Input Bar */}
+        <Card withBorder radius="md" p="md" shadow="sm" mb="md">
+          <Group align="flex-end" gap="sm">
+            <TextInput
+              placeholder="e.g., https://example.com"
+              label="Target URL"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              flex={1}
+              size="md"
+              radius="md"
+              leftSection={<IconScan size={18} opacity={0.5} />}
+              onFocus={(e) => e.target.select()}
+            />
+            <Button
+              onClick={startScan}
+              disabled={running || !/^https?:\/\//i.test(url)}
+              color="teal"
+              size="md"
+              radius="md"
+              leftSection={running ? undefined : <IconScan size={18} />}
+              loading={running}
+            >
+              {running ? "Scanning…" : "Scan Now"}
+            </Button>
+            
+            {/* Action Group for Exports */}
+            {result && (
+              <Group gap="xs">
+                 <Button
+                  onClick={downloadJson}
+                  variant="default"
+                  size="md"
+                  radius="md"
+                  leftSection={<IconDeviceFloppy size={18} />}
+                >
+                  JSON
+                </Button>
+                <Button
+                  onClick={exportPDF}
+                  variant="gradient"
+                  gradient={{ from: 'indigo', to: 'cyan' }}
+                  size="md"
+                  radius="md"
+                  leftSection={<IconDownload size={18} />}
+                >
+                  Save PDF Report
+                </Button>
+              </Group>
+            )}
+          </Group>
+        </Card>
+
+        {/* Progress Bar */}
+        <Box mb={24}>
+          <Progress 
+            value={progress} 
+            size="lg" 
+            radius="xl" 
+            color="teal" 
+            striped={running} 
+            animated={running}
+            transitionDuration={200}
           />
-          <button onClick={startScan} disabled={running || !/^https?:\/\//i.test(url)} style={btn(running, colors.green)}>
-            {running ? "Scanning…" : "Scan"}
-          </button>
-          <button onClick={downloadJson} disabled={!result} style={btn(!result, colors.blue)}>
-            Download JSON
-          </button>
-        </div>
+        </Box>
 
-        <div style={{ height: "8px", background: colors.border, borderRadius: "999px", overflow: "hidden", marginBottom: "20px" }}>
-          <div style={{ height: "100%", width: `${progress}%`, background: `linear-gradient(90deg, ${colors.green}, ${colors.primary})`, transition: "width .3s ease-out" }}/>
-        </div>
-
+        {/* Error Alert */}
         {error && (
-          <div style={{ marginBottom: "20px", padding: "12px", border: `1px solid ${colors.red}80`, background: `${colors.red}20`, color: colors.red, borderRadius: "10px", fontWeight: 500 }}>
+          <Alert icon={<IconAlertCircle size={16} />} title="Scan Failed" color="red" mb="lg">
             {error}
-          </div>
+          </Alert>
         )}
 
-        <div style={{ display: "grid", gridTemplateColumns: "380px 1fr", gap: "20px", alignItems: "start" }}>
-          <div style={card}>
-            <h2 style={{ fontWeight: 700, margin: '0 0 12px 0', fontSize: '18px' }}>Live Logs</h2>
-            <div style={{ height: "400px", overflow: "auto", background: "#fafafa", padding: "10px", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontSize: "12px", borderRadius: "8px", border: `1px solid ${colors.border}` }}>
-              {logs.length ? logs.map((l, i) => <div key={i} style={{ padding: '2px 0' }}>{l}</div>) : <span style={{color: colors.textSecondary}}>Logs will appear here...</span>}
-            </div>
-          </div>
-          
-          <div style={{display: 'flex', flexDirection: 'column', gap: '20px'}}>
+        {/* Main Main Content Layout */}
+        <Grid gutter="lg" align="flex-start">
+          {/* Logs */}
+          <Grid.Col span={{ base: 12, md: 4, lg: 3 }}>
+            <Card withBorder shadow="sm" radius="md" p="md">
+              <Title order={4} mb="sm" fw={700}>Live Logs</Title>
+              <Paper 
+                withBorder 
+                bg="gray.0" 
+                p="sm" 
+                radius="sm" 
+                h={result ? 600 : 400} 
+                style={{ overflowY: "auto", transition: "height 0.3s ease" }}
+              >
+                <Stack gap={4}>
+                  {logs.length > 0 ? (
+                    logs.map((l, i) => (
+                      <Text key={i} size="xs" ff="monospace" c="dimmed" style={{ wordBreak: "break-all" }}>
+                        {l}
+                      </Text>
+                    ))
+                  ) : (
+                    <Text size="sm" c="dimmed" fs="italic">Logs will appear here...</Text>
+                  )}
+                </Stack>
+              </Paper>
+            </Card>
+          </Grid.Col>
+
+          {/* Results Area */}
+          <Grid.Col span={{ base: 12, md: 8, lg: 9 }}>
             {!result ? (
-               <div style={{ ...card, textAlign: 'center', padding: '40px', color: colors.textSecondary }}>
-                 {running ? "Analyzing site..." : "Run a scan to see the compliance report."}
-               </div>
+              <Card 
+                withBorder 
+                shadow="sm" 
+                radius="md" 
+                p={40} 
+                style={{ display: "grid", placeItems: "center", minHeight: 400 }}
+              >
+                <Stack align="center" gap="sm">
+                  <ThemeIcon size={64} radius="xl" variant="light" color="gray">
+                    <IconScan size={32} />
+                  </ThemeIcon>
+                  <Text size="lg" c="dimmed" fw={500}>
+                    {running ? "Analyzing site..." : "Run a scan to see the compliance report."}
+                  </Text>
+                </Stack>
+              </Card>
             ) : (
-              <ResultCard result={result} />
+              <Box id="report-container">
+                <Stack gap="lg">
+                  <ResultSummary result={result} />
+                  <ViolationTips result={result} />
+                  <CookiesSection cookies={Array.isArray(result.cookieReport) ? result.cookieReport : []} />
+                </Stack>
+              </Box>
             )}
-          </div>
-        </div>
-      </div>
-    </div>
+          </Grid.Col>
+        </Grid>
+
+      </Container>
+    </Box>
   );
 }
 
-const ScoreCircle = ({ score }) => {
-    const size = 80;
-    const strokeWidth = 8;
-    const radius = (size - strokeWidth) / 2;
-    const circumference = 2 * Math.PI * radius;
-    const offset = circumference - (score / 100) * circumference;
-    const color = score > 80 ? colors.green : score > 50 ? '#ffcc00' : colors.red;
+// ----------------------------------------------------- //
+// Sub-components
+// ----------------------------------------------------- //
 
-    return (
-        <div style={{ position: 'relative', width: size, height: size, gridRow: 'span 2' }}>
-            <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
-                <circle cx={size/2} cy={size/2} r={radius} stroke={colors.border} strokeWidth={strokeWidth} fill="transparent" />
-                <circle cx={size/2} cy={size/2} r={radius} stroke={color} strokeWidth={strokeWidth} fill="transparent" strokeDasharray={circumference} strokeDashoffset={offset} strokeLinecap="round" style={{ transition: 'stroke-dashoffset 0.5s ease' }} />
-            </svg>
-            <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', fontWeight: 700, color: colors.dark }}>
-                {score}
-            </div>
-        </div>
-    );
-};
+function ResultSummary({ result }) {
+  const getScoreColor = (score) => {
+    if (score >= 80) return "teal";
+    if (score >= 50) return "yellow";
+    return "red";
+  };
+  const color = getScoreColor(result.score);
+  
+  // Feature 6: Categorized Trackers handling
+  const getCategoryColor = (cat) => {
+     switch(cat) {
+        case "Analytics": return "blue";
+        case "Advertising": return "pink";
+        case "Marketing": return "orange";
+        case "Social": return "indigo";
+        case "Essential": return "gray";
+        case "Media": return "red";
+        default: return "dark";
+     }
+  }
 
-function ResultCard({ result }) {
-  const cookies = Array.isArray(result.cookieReport) ? result.cookieReport : [];
+  const trackers = result.categorizedTrackers || [];
+
+  return (
+    <Card withBorder radius="md" shadow="sm" p="lg">
+      <Title order={3} fw={700} mb="md">Scan Summary</Title>
+      
+      <Group align="center" gap="xl">
+        <RingProgress
+          size={120}
+          thickness={12}
+          roundCaps
+          sections={[{ value: result.score, color }]}
+          label={
+            <Text c={color} fw={700} ta="center" size="xl">
+              {result.score}
+            </Text>
+          }
+        />
+        
+        <Stack gap="xs" style={{ flex: 1 }}>
+          <Group>
+            <Text fw={600} w={120}>Target Site:</Text>
+            <Text component="a" href={result.site} target="_blank" c="blue" fw={500}>
+              {result.site}
+            </Text>
+          </Group>
+          <Group>
+            <Text fw={600} w={120}>Pages Scanned:</Text>
+            <Badge size="lg" variant="light" color="blue">{result.scannedPages?.length ?? 0}</Badge>
+          </Group>
+          
+          {/* Feature 2: Privacy Policy Display */}
+          <Group>
+            <Text fw={600} w={120}>Privacy Policy:</Text>
+            {result.privacyPolicyFound ? (
+              <Badge size="md" color={result.policyRealityCheck?.passed ? "teal" : "red"} variant="light">
+                 {result.policyRealityCheck?.passed ? "Passed Reality Check" : "Incomplete (Missing Trackers)"}
+              </Badge>
+            ) : (
+              <Badge size="md" color="red" variant="filled">Not Found</Badge>
+            )}
+          </Group>
+
+          {/* Feature 6: Tracker Categorization Display */}
+          <Group align="flex-start">
+            <Text fw={600} w={120}>3rd-Party Hosts:</Text>
+            <ScrollArea h={65} style={{ flex: 1 }}>
+              {trackers.length > 0 ? (
+                <Group gap="xs">
+                   {trackers.map((t, i) => (
+                      <Badge key={i} color={getCategoryColor(t.category)} variant="light" size="sm" title={t.url}>
+                         {t.category}: {t.name}
+                      </Badge>
+                   ))}
+                </Group>
+              ) : (
+                 <Text size="sm" c="dimmed">None detected</Text>
+              )}
+            </ScrollArea>
+          </Group>
+        </Stack>
+      </Group>
+    </Card>
+  );
+}
+
+function ViolationTips({ result }) {
+  const [cmpModalOpen, setCmpModalOpen] = useState(false);
+  
+  // Feature 3: Actionable Fixes Check
+  const needsBanner = !result.consentBannerDetected && (result.thirdPartyRequests?.length > 0 || result.cookies?.length > 0);
 
   return (
     <>
-    <div style={{ ...card, fontSize: "14px" }}>
-        <h2 style={{ fontWeight: 700, margin: '0 0 16px 0', fontSize: '18px' }}>Summary</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '10px 20px', alignItems: 'center' }}>
-            <ScoreCircle score={result.score} />
-            <b>Site:</b> <a href={result.site} target="_blank" rel="noopener noreferrer" style={{color: colors.primary}}>{result.site}</a>
-            <b>Pages scanned:</b> <span>{result.scannedPages?.length ?? 0}</span>
-            <b style={{alignSelf: 'start'}}>Third-party hosts:</b> 
-            <p style={{ margin: 0, color: colors.textSecondary, maxHeight: '60px', overflow: 'auto' }}>
-                {result.thirdPartyRequests?.length ? result.thirdPartyRequests.join(", ") : "none"}
-            </p>
-        </div>
-    </div>
-    <div style={card}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-            <div>
-                <h3 style={{ fontWeight: 600, margin: '0 0 12px 0', fontSize: '16px', color: colors.red }}>Violations</h3>
-                <ul style={{ margin: 0, paddingLeft: "20px", color: colors.text }}>
-                    {result.violations?.length
-                        ? result.violations.map((v, i) => <li key={i} style={{marginBottom: '6px'}}>{v}</li>)
-                        : <li>None detected</li>}
-                </ul>
-            </div>
-            <div>
-                <h3 style={{ fontWeight: 600, margin: '0 0 12px 0', fontSize: '16px', color: colors.green }}>Tips</h3>
-                <ul style={{ margin: 0, paddingLeft: "20px", color: colors.text }}>
-                    {result.tips?.length
-                        ? result.tips.map((t, i) => <li key={i} style={{marginBottom: '6px'}}>{t}</li>)
-                        : <li>No specific tips.</li>}
-                </ul>
-            </div>
-        </div>
-    </div>
-    <div style={card}>
-      <CookiesTable rows={cookies} />
-    </div>
+      <Grid gutter="lg">
+        <Grid.Col span={{ base: 12, md: 6 }}>
+          <Card withBorder radius="md" shadow="sm" p="lg" h="100%">
+            <Group gap="xs" mb="md">
+              <ThemeIcon color="red" variant="light" radius="xl" size="md">
+                <IconAlertCircle size={18} />
+              </ThemeIcon>
+              <Title order={4} fw={700} c="red.7">Violations Detected</Title>
+            </Group>
+            <Stack gap="sm">
+              {result.violations?.length ? (
+                result.violations.map((v, i) => (
+                  <Alert key={i} variant="light" color="red" p="xs" radius="md">
+                    <Text size="sm">{v}</Text>
+                  </Alert>
+                ))
+              ) : (
+                <Text size="sm" c="dimmed">No violations detected!</Text>
+              )}
+            </Stack>
+          </Card>
+        </Grid.Col>
+
+        <Grid.Col span={{ base: 12, md: 6 }}>
+          <Card withBorder radius="md" shadow="sm" p="lg" h="100%">
+            <Group gap="xs" mb="md">
+              <ThemeIcon color="teal" variant="light" radius="xl" size="md">
+                <IconCheck size={18} />
+              </ThemeIcon>
+              <Title order={4} fw={700} c="teal.7">Recommendations</Title>
+            </Group>
+            <Stack gap="sm">
+              {result.tips?.length ? (
+                result.tips.map((t, i) => (
+                  <Alert key={i} variant="light" color="teal" p="xs" radius="md">
+                    <Text size="sm">{t}</Text>
+                  </Alert>
+                ))
+              ) : (
+                <Text size="sm" c="dimmed">No specific tips available.</Text>
+              )}
+              
+              {/* Feature 3: CMP Snippet CTA */}
+              {needsBanner && (
+                  <Button 
+                    variant="light" 
+                    color="indigo" 
+                    leftSection={<IconCodeAsterisk size={16}/>} 
+                    onClick={() => setCmpModalOpen(true)}
+                    mt="sm"
+                  >
+                    View Banner Solutions
+                  </Button>
+              )}
+
+            </Stack>
+          </Card>
+        </Grid.Col>
+      </Grid>
+      
+      {/* Feature 3: CMP Snippets Modal */}
+      <Modal opened={cmpModalOpen} onClose={() => setCmpModalOpen(false)} title="Consent Banner Fixes" size="lg" centered>
+         <Text size="sm" mb="md">
+            Your site is loading trackers before obtaining user consent. To fix this, you must implement a Consent Management Platform (CMP).
+         </Text>
+         
+         <Title order={5} mb="xs">Option 1: Klaro (Free & Open Source)</Title>
+         <Text size="sm" c="dimmed" mb="xs">Add this inside your {"<head>"} tag to install a free, highly-customizable banner.</Text>
+         <Code block copyLabel="Copy" copiedLabel="Copied!">
+{`<!-- Klaro Consent Manager -->
+<script defer type="text/javascript" src="https://cdn.kiprotect.com/klaro/v0.7/klaro.js"></script>
+`}
+         </Code>
+         
+         <Title order={5} mt="lg" mb="xs">Option 2: Cookiebot (Enterprise / Paid)</Title>
+         <Text size="sm" c="dimmed" mb="xs">A widely adapted standard. Replace the data-cbid with your own.</Text>
+         <Code block copyLabel="Copy" copiedLabel="Copied!">
+{`<!-- Cookiebot CMP -->
+<script id="Cookiebot" src="https://consent.cookiebot.com/uc.js" data-cbid="00000000-0000-0000-0000-000000000000" type="text/javascript" async></script>
+`}
+         </Code>
+         
+         <Alert title="Important Setup Step" color="yellow" mt="lg">
+            Remember: Just installing the banner is not enough. You must update your existing analytics scripts to wait for consent (e.g. changing <code>type="text/javascript"</code> to <code>type="text/plain" data-type="application/javascript"</code> depending on your CMP).
+         </Alert>
+      </Modal>
     </>
   );
 }
 
-function CookiesTable({ rows }) {
+function CookiesSection({ cookies }) {
   const [q, setQ] = useState("");
   const [page, setPage] = useState(1);
   const [sort, setSort] = useState({ key: "lifetimeDays", dir: "desc" });
@@ -299,9 +535,9 @@ function CookiesTable({ rows }) {
 
   const filtered = useMemo(() => {
     const query = q.trim().toLowerCase();
-    let list = rows;
+    let list = cookies;
     if (query) {
-      list = rows.filter((r) =>
+      list = cookies.filter((r) =>
         Object.values(r).some(val => String(val).toLowerCase().includes(query))
       );
     }
@@ -312,7 +548,7 @@ function CookiesTable({ rows }) {
       if (typeof A === "number" && typeof B === "number") return sgn * (A - B);
       return sgn * String(A ?? "").localeCompare(String(B ?? ""));
     });
-  }, [rows, q, sort]);
+  }, [cookies, q, sort]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const startIdx = (page - 1) * pageSize;
@@ -320,66 +556,105 @@ function CookiesTable({ rows }) {
 
   useEffect(() => { setPage(1); }, [q, sort.key, sort.dir]);
 
-  const header = (label, key, width) => (
-    <th onClick={() => setSort(s => (s.key === key ? { key, dir: s.dir === "asc" ? "desc" : "asc" } : { key, dir: "asc" }))}
-      style={{ ...th, width, cursor: "pointer", userSelect: "none" }} title="Click to sort">
-      {label}
-      <span style={{ opacity: sort.key === key ? 1 : 0.3, marginLeft: 6, fontSize: 12 }}>
-        {sort.key === key ? (sort.dir === "asc" ? "▲" : "▼") : "↕"}
-      </span>
-    </th>
+  const handleSort = (key) => {
+    setSort(s => (s.key === key ? { key, dir: s.dir === "asc" ? "desc" : "asc" } : { key, dir: "asc" }));
+  };
+
+  const getSortIcon = (key) => {
+    if (sort.key !== key) return <IconSelector size={14} style={{ opacity: 0.3 }} />;
+    return sort.dir === "asc" ? <IconChevronUp size={14} /> : <IconChevronDown size={14} />;
+  };
+
+  const Th = ({ label, sortKey }) => (
+    <Table.Th 
+      onClick={() => handleSort(sortKey)} 
+      style={{ cursor: "pointer", whiteSpace: "nowrap" }}
+    >
+      <Group gap="xs" justify="space-between">
+        <Text fw={600} size="sm">{label}</Text>
+        {getSortIcon(sortKey)}
+      </Group>
+    </Table.Th>
   );
 
   return (
-    <div>
-      <div style={{ display: "flex", alignItems: "center", marginBottom: "12px" }}>
-        <h2 style={{ fontWeight: 700, margin: 0, fontSize: '18px' }}>Cookies ({rows.length})</h2>
-        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search all fields..."
-          style={{ padding: "8px 12px", border: `1px solid ${colors.border}`, borderRadius: "8px", minWidth: "280px", marginLeft: 'auto' }}
+    <Card withBorder radius="md" shadow="sm" p="lg">
+      <Group justify="space-between" mb="md">
+        <Group>
+          <Title order={3} fw={700}>Cookies</Title>
+          <Badge size="lg" color="gray" variant="light">{cookies.length}</Badge>
+        </Group>
+        <TextInput
+          placeholder="Search cookies..."
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          leftSection={<IconSearch size={16} />}
+          radius="md"
+          w={{ base: "100%", sm: 250 }}
         />
-      </div>
-      <div style={{ overflowX: "auto", border: `1px solid ${colors.border}`, borderRadius: "12px" }}>
-        <table style={{ width: "100%", borderCollapse: "separate", borderSpacing: 0, textAlign: 'left' }}>
-          <thead>
-            <tr>
-              {header("Name", "name", '220px')}
-              {header("Domain", "domain", '180px')}
-              {header("Type", "firstParty", '100px')}
-              {header("Purpose", "purpose", '200px')}
-              {header("Expires", "expiresAt", '170px')}
-              {header("Lifetime", "lifetimeDays", '100px')}
-              {header("Secure", "secure", '80px')}
-            </tr>
-          </thead>
-          <tbody>
+      </Group>
+
+      <Table.ScrollContainer minWidth={800}>
+        <Table striped highlightOnHover verticalSpacing="sm" withTableBorder withColumnBorders>
+          <Table.Thead bg="gray.0">
+            <Table.Tr>
+              <Th label="Name" sortKey="name" />
+              <Th label="Domain" sortKey="domain" />
+              <Th label="Type" sortKey="firstParty" />
+              <Th label="Purpose" sortKey="purpose" />
+              <Th label="Expires" sortKey="expiresAt" />
+              <Th label="Lifetime (Days)" sortKey="lifetimeDays" />
+              <Th label="Secure" sortKey="secure" />
+            </Table.Tr>
+          </Table.Thead>
+          <Table.Tbody>
             {pageRows.length === 0 ? (
-              <tr><td colSpan={7} style={{ ...td, color: colors.textSecondary, textAlign: "center", padding: '24px' }}>No cookies found.</td></tr>
+              <Table.Tr>
+                <Table.Td colSpan={7} ta="center" py="xl" c="dimmed">
+                  No cookies found matching criteria.
+                </Table.Td>
+              </Table.Tr>
             ) : (
               pageRows.map((c, i) => (
-                <tr key={i} style={{ background: i % 2 ? colors.lightGray : "#fff" }}>
-                  <td style={td}><code>{c.name}</code></td>
-                  <td style={td}>{c.domain}</td>
-                  <td style={td}>{c.firstParty ? "First-Party" : "Third-Party"}</td>
-                  <td style={td}>{c.purpose || <span style={{color: colors.textSecondary}}>Unknown</span>}</td>
-                  <td style={td}>{c.expiresAt ? new Date(c.expiresAt).toLocaleString() : "Session"}</td>
-                  <td style={td}>{c.lifetimeDays ?? "-"}</td>
-                  <td style={td}><span style={{fontWeight: 500, color: c.secure ? colors.green : colors.red}}>{c.secure ? "Yes" : "No"}</span></td>
-                </tr>
+                <Table.Tr key={i}>
+                  <Table.Td><Text size="sm" ff="monospace" fw={600}>{c.name}</Text></Table.Td>
+                  <Table.Td><Text size="sm">{c.domain}</Text></Table.Td>
+                  <Table.Td>
+                    <Badge variant={c.firstParty ? "light" : "outline"} color={c.firstParty ? "teal" : "orange"} size="sm">
+                      {c.firstParty ? "1st-Party" : "3rd-Party"}
+                    </Badge>
+                  </Table.Td>
+                  <Table.Td><Text size="sm" c={!c.purpose ? "dimmed" : "text"}>{c.purpose || "Unknown"}</Text></Table.Td>
+                  <Table.Td><Text size="sm">{c.expiresAt ? new Date(c.expiresAt).toLocaleString() : "Session"}</Text></Table.Td>
+                  <Table.Td><Text size="sm">{c.lifetimeDays ?? "-"}</Text></Table.Td>
+                  <Table.Td>
+                    {c.secure ? 
+                      <Badge color="teal" variant="dot">Yes</Badge> : 
+                      <Badge color="red" variant="dot">No</Badge>
+                    }
+                  </Table.Td>
+                </Table.Tr>
               ))
             )}
-          </tbody>
-        </table>
-      </div>
+          </Table.Tbody>
+        </Table>
+      </Table.ScrollContainer>
+
       {totalPages > 1 && (
-        <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 12, fontSize: '14px' }}>
-          <span style={{ color: colors.textSecondary }}>
+        <Group justify="space-between" mt="md">
+          <Text size="sm" c="dimmed">
             Page {page} of {totalPages}
-          </span>
-          <div style={{ marginLeft: "auto" }} />
-          <button onClick={() => setPage(p => p - 1)} disabled={page <= 1} style={btn(page <= 1, colors.dark)}>Prev</button>
-          <button onClick={() => setPage(p => p + 1)} disabled={page >= totalPages} style={btn(page >= totalPages, colors.dark)}>Next</button>
-        </div>
+          </Text>
+          <Group gap="xs">
+            <Button variant="default" size="sm" onClick={() => setPage(p => p - 1)} disabled={page <= 1}>
+              Prev
+            </Button>
+            <Button variant="default" size="sm" onClick={() => setPage(p => p + 1)} disabled={page >= totalPages}>
+              Next
+            </Button>
+          </Group>
+        </Group>
       )}
-    </div>
+    </Card>
   );
 }

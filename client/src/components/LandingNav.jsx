@@ -1,6 +1,7 @@
 import React from "react";
-import { Container, Group, Anchor, Button, Paper, Text } from "@mantine/core";
+import { Container, Group, Anchor, Button, Paper, Text, ActionIcon } from "@mantine/core";
 import { Link } from "react-router-dom";
+import { IconBrandGithub, IconBrandLinkedin } from "@tabler/icons-react";
 
 export default function LandingNav() {
   return (
@@ -14,6 +15,7 @@ export default function LandingNav() {
         zIndex: 40,
         background: "rgba(255,255,255,0.85)",
         backdropFilter: "blur(8px)",
+        borderBottom: "1px solid rgba(0,0,0,0.05)",
       }}
     >
       <Container size="lg" py="sm">
@@ -24,7 +26,7 @@ export default function LandingNav() {
             underline="never"
             style={{ textDecoration: "none" }}
           >
-            {/* Gradient updated to match  image */}
+           
             <Text
               size="xl"
               fw={900}
@@ -40,7 +42,8 @@ export default function LandingNav() {
               component={Link}
               to="/"
               c="gray.7"
-              style={{ textDecoration: "none" }}
+              fw={500}
+              style={{ textDecoration: "none", transition: "color 0.2s" }}
             >
               Home
             </Anchor>
@@ -48,10 +51,39 @@ export default function LandingNav() {
             <Anchor
               href="/docs"
               c="gray.7"
-              style={{ textDecoration: "none" }}
+              fw={500}
+              style={{ textDecoration: "none", transition: "color 0.2s" }}
             >
               Docs
             </Anchor>
+
+            {/* Social Icons */}
+            <Group gap="xs" ml="sm" mr="sm">
+              <ActionIcon
+                component="a"
+                href="https://github.com/inahus99"
+                target="_blank"
+                rel="noopener noreferrer"
+                variant="subtle"
+                color="gray"
+                size="lg"
+                radius="xl"
+              >
+                <IconBrandGithub size={20} stroke={1.5} />
+              </ActionIcon>
+              <ActionIcon
+                component="a"
+                href="https://linkedin.com/in/inahus99" // Updated to generic placeholder or standard mapping
+                target="_blank"
+                rel="noopener noreferrer"
+                variant="subtle"
+                color="gray"
+                size="lg"
+                radius="xl"
+              >
+                <IconBrandLinkedin size={20} stroke={1.5} />
+              </ActionIcon>
+            </Group>
 
             <Button
               component={Link}
@@ -60,6 +92,9 @@ export default function LandingNav() {
               size="sm"
               variant="gradient"
               gradient={{ from: "#14f1d9", to: "#0b8a8f" }}
+              style={{
+                boxShadow: "0 4px 14px rgba(20, 241, 217, 0.4)",
+              }}
             >
               Run a Free Scan
             </Button>
