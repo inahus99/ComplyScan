@@ -1,0 +1,119 @@
+/* ── Matrix rain columns ── */
+@keyframes matrixRain {
+  0%   { transform: translateY(-120%); opacity: 0; }
+  5%   { opacity: 1; }
+  95%  { opacity: 0.6; }
+  100% { transform: translateY(120vh); opacity: 0; }
+}
+
+@keyframes glowPulse {
+  0%, 100% { opacity: 0.4; text-shadow: 0 0 6px #14f1d9; }
+  50%       { opacity: 1;   text-shadow: 0 0 18px #14f1d9, 0 0 32px #0b8a8f; }
+}
+
+@keyframes scanLine {
+  0%   { top: 0; }
+  100% { top: 100%; }
+}
+
+@keyframes borderGlow {
+  0%, 100% { box-shadow: 0 0 8px rgba(20, 241, 217, 0.3); }
+  50%       { box-shadow: 0 0 24px rgba(20, 241, 217, 0.7), 0 0 48px rgba(11, 138, 143, 0.3); }
+}
+
+@keyframes typewriter {
+  from { width: 0; }
+  to   { width: 100%; }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+@keyframes floatUp {
+  0%   { transform: translateY(8px); opacity: 0; }
+  100% { transform: translateY(0);   opacity: 1; }
+}
+
+@keyframes gridShift {
+  0%   { background-position: 0 0; }
+  100% { background-position: 40px 40px; }
+}
+
+/* Terminal window */
+.terminal-window {
+  background: #0a0e17;
+  border: 1px solid rgba(20, 241, 217, 0.2);
+  border-radius: 12px;
+  box-shadow: 0 0 40px rgba(20, 241, 217, 0.08), inset 0 0 20px rgba(20, 241, 217, 0.02);
+  overflow: hidden;
+}
+
+.terminal-header {
+  background: rgba(20, 241, 217, 0.05);
+  border-bottom: 1px solid rgba(20, 241, 217, 0.1);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.terminal-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.terminal-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 0;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  animation: floatUp 0.4s ease both;
+}
+
+.terminal-cursor {
+  display: inline-block;
+  width: 8px;
+  height: 14px;
+  background: #14f1d9;
+  animation: blink 1s step-end infinite;
+  vertical-align: text-bottom;
+}
+
+/* Neon badge */
+.neon-badge {
+  background: rgba(20, 241, 217, 0.08);
+  border: 1px solid rgba(20, 241, 217, 0.3);
+  color: #14f1d9;
+  padding: 4px 14px;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  animation: borderGlow 3s ease-in-out infinite;
+}
+
+/* Glow button */
+.glow-btn {
+  animation: borderGlow 2.5s ease-in-out infinite;
+}
+
+/* Code rain characters */
+.code-col {
+  position: absolute;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: #14f1d9;
+  line-height: 1.6;
+  pointer-events: none;
+  animation: matrixRain linear infinite;
+}

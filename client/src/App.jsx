@@ -1,32 +1,24 @@
-
 import React from "react";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ThemeProvider } from "./context/ThemeContext";
 import LandingPage from "./LandingPage";
 import ScannerPage from "./ScannerPage";
-import Footer from "./components/Footer";
-
-function AppShell() {
-  const location = useLocation();
-  const isLanding = location.pathname === "/";
-
-  return (
-    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
-      <div style={{ flex: 1, minHeight: 0 }}>
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/scan" element={<ScannerPage />} />
-        </Routes>
-      </div>
-    
-      <Footer fixed={isLanding} blend={isLanding} />
-    </div>
-  );
-}
+import ArchivePage from "./ArchivePage";
+import BenchmarkPage from "./BenchmarkPage";
+import SettingsPage from "./SettingsPage";
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <AppShell />
-    </BrowserRouter>
+    <ThemeProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/"           element={<LandingPage />} />
+          <Route path="/scan"       element={<ScannerPage />} />
+          <Route path="/archive"    element={<ArchivePage />} />
+          <Route path="/benchmarks" element={<BenchmarkPage />} />
+          <Route path="/settings"   element={<SettingsPage />} />
+        </Routes>
+      </BrowserRouter>
+    </ThemeProvider>
   );
 }

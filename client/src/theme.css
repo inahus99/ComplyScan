@@ -1,0 +1,49 @@
+/* ── ComplyScan Design Tokens — Earthy Magazine Palette ──────────────────── */
+:root {
+  --cs-bg:           #faf7f2;
+  --cs-bg-alt:       #f2ede4;
+  --cs-bg-card:      #fdfaf5;
+  --cs-bg-scanner:   #ede8dc;
+  --cs-fg:           #1c1612;
+  --cs-fg-muted:     rgba(44,34,22,0.55);
+  --cs-fg-dim:       rgba(44,34,22,0.35);
+  --cs-border:       rgba(120,90,55,0.14);
+  --cs-border-med:   rgba(120,90,55,0.20);
+  --cs-border-strong:rgba(120,90,55,0.28);
+  --cs-hover-bg:     rgba(120,90,55,0.05);
+  --cs-grid-line:    rgba(120,90,55,0.05);
+  --cs-invert-bg:    #1c1612;
+  --cs-invert-fg:    #faf7f2;
+  --cs-nav-blur:     rgba(250,247,242,0.97);
+  --cs-accent:       #8b6f47;
+}
+
+[data-theme="dark"] {
+  --cs-bg:           #100e09;
+  --cs-bg-alt:       #171410;
+  --cs-bg-card:      #1d1a13;
+  --cs-bg-scanner:   #0d0b07;
+  --cs-fg:           #e8e0d0;
+  --cs-fg-muted:     rgba(232,224,208,0.50);
+  --cs-fg-dim:       rgba(232,224,208,0.30);
+  --cs-border:       rgba(232,224,208,0.10);
+  --cs-border-med:   rgba(232,224,208,0.15);
+  --cs-border-strong:rgba(232,224,208,0.22);
+  --cs-hover-bg:     rgba(232,224,208,0.05);
+  --cs-grid-line:    rgba(232,224,208,0.03);
+  --cs-invert-bg:    #2a241a;
+  --cs-invert-fg:    #e8e0d0;
+  --cs-nav-blur:     rgba(16,14,9,0.97);
+  --cs-accent:       #c4a47a;
+}
+
+/* Apply base palette to root */
+html, body, #root {
+  background-color: var(--cs-bg);
+  color: var(--cs-fg);
+}
+
+/* Smooth theme transitions */
+*, *::before, *::after {
+  transition: background-color 0.25s ease, border-color 0.25s ease, color 0.2s ease;
+}

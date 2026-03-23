@@ -1,106 +1,150 @@
-import React from "react";
-import { Container, Group, Anchor, Button, Paper, Text, ActionIcon } from "@mantine/core";
-import { Link } from "react-router-dom";
-import { IconBrandGithub, IconBrandLinkedin } from "@tabler/icons-react";
+import React, { useState, useEffect } from "react";
+import { Box, Text, Group } from "@mantine/core";
+import { Link, useLocation } from "react-router-dom";
+import { Search, Sun, Moon } from "lucide-react";
+import { useTheme } from "../context/ThemeContext";
 
-export default function LandingNav() {
+const NAV_LINKS = [
+  { label: "Reports",    to: "/scan" },
+  { label: "Archive",    to: "/archive" },
+  { label: "Benchmarks", to: "/benchmarks" },
+  { label: "Settings",   to: "/settings" },
+];
+
+export default function LandingNav({ showSearch = false }) {
+  const [scrolled, setScrolled] = useState(false);
+  const { dark, toggle } = useTheme();
+  const location = useLocation();
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 10);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const navBg = scrolled
+    ? "var(--cs-nav-blur)"
+    : "var(--cs-bg)";
+
   return (
-    <Paper
-      withBorder={false}
-      shadow="xs"
-      radius={0}
+    <Box
+      component="nav"
       style={{
         position: "sticky",
         top: 0,
-        zIndex: 40,
-        background: "rgba(255,255,255,0.85)",
-        backdropFilter: "blur(8px)",
-        borderBottom: "1px solid rgba(0,0,0,0.05)",
+        zIndex: 200,
+        background: navBg,
+        backdropFilter: scrolled ? "blur(10px)" : "none",
+        borderBottom: "1px solid var(--cs-border)",
+        transition: "background 0.25s ease, border-color 0.2s ease",
       }}
     >
-      <Container size="lg" py="sm">
-        <Group justify="space-between" align="center">
-          <Anchor
-            component={Link}
-            to="/"
-            underline="never"
-            style={{ textDecoration: "none" }}
+      <Box
+        style={{
+          maxWidth: 1280,
+          margin: "0 auto",
+          padding: "0 40px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          height: 56,
+        }}
+      >
+        {/* Logo */}
+        <Link to="/" style={{ textDecoration: "none" }}>
+          <Text
+            style={{
+              fontFamily: "Inter, system-ui, sans-serif",
+              fontWeight: 800,
+              fontSize: 14,
+              letterSpacing: "0.2em",
+              color: "var(--cs-fg)",
+              textTransform: "uppercase",
+              transition: "color 0.15s",
+            }}
           >
-           
-            <Text
-              size="xl"
-              fw={900}
-              variant="gradient"
-              gradient={{ from: "#14f1d9", to: "#0b8a8f", deg: 45 }}
-            >
-              ComplyScan
-            </Text>
-          </Anchor>
+            ComplyScan
+          </Text>
+        </Link>
 
-          <Group gap="lg" align="center">
-            <Anchor
-              component={Link}
-              to="/"
-              c="gray.7"
-              fw={500}
-              style={{ textDecoration: "none", transition: "color 0.2s" }}
-            >
-              Home
-            </Anchor>
-
-            <Anchor
-              href="/docs"
-              c="gray.7"
-              fw={500}
-              style={{ textDecoration: "none", transition: "color 0.2s" }}
-            >
-              Docs
-            </Anchor>
-
-            {/* Social Icons */}
-            <Group gap="xs" ml="sm" mr="sm">
-              <ActionIcon
-                component="a"
-                href="https://github.com/inahus99"
-                target="_blank"
-                rel="noopener noreferrer"
-                variant="subtle"
-                color="gray"
-                size="lg"
-                radius="xl"
-              >
-                <IconBrandGithub size={20} stroke={1.5} />
-              </ActionIcon>
-              <ActionIcon
-                component="a"
-                href="https://linkedin.com/in/inahus99" // Updated to generic placeholder or standard mapping
-                target="_blank"
-                rel="noopener noreferrer"
-                variant="subtle"
-                color="gray"
-                size="lg"
-                radius="xl"
-              >
-                <IconBrandLinkedin size={20} stroke={1.5} />
-              </ActionIcon>
-            </Group>
-
-            <Button
-              component={Link}
-              to="/scan"
-              radius="xl"
-              size="sm"
-              variant="gradient"
-              gradient={{ from: "#14f1d9", to: "#0b8a8f" }}
-              style={{
-                boxShadow: "0 4px 14px rgba(20, 241, 217, 0.4)",
-              }}
-            >
-              Run a Free Scan
-            </Button>
-          </Group>
+        {/* Center nav links */}
+        <Group gap={36}>
+          {NAV_LINKS.map(({ label, to }) => {
+            const active = location.pathname === to;
+            return (
+              <Link key={label} to={to} style={{ textDecoration: "none" }}>
+                <Text
+                  style={{
+                    fontSize: 13,
+                    fontWeight: active ? 600 : 400,
+                    color: active ? "var(--cs-fg)" : "var(--cs-fg-muted)",
+                    letterSpacing: "0.01em",
+                    transition: "color 0.15s",
+                    cursor: "pointer",
+                    borderBottom: active ? "1px solid var(--cs-fg)" : "1px solid transparent",
+                    paddingBottom: 1,
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.color = "var(--cs-fg)")}
+                  onMouseLeave={e => (e.currentTarget.style.color = active ? "var(--cs-fg)" : "var(--cs-fg-muted)")}
+                >
+                  {label}
+                </Text>
+              </Link>
+            );
+          })}
         </Group>
-      </Container>
-    </Paper>
+
+        {/* Right actions */}
+        <Group gap={18} align="center">
+          {showSearch && (
+            <Box
+              style={{ cursor: "pointer", color: "var(--cs-fg-muted)", display: "flex", alignItems: "center", transition: "color 0.15s" }}
+              onMouseEnter={e => (e.currentTarget.style.color = "var(--cs-fg)")}
+              onMouseLeave={e => (e.currentTarget.style.color = "var(--cs-fg-muted)")}
+            >
+              <Search size={16} />
+            </Box>
+          )}
+
+          {/* Dark mode toggle */}
+          <Box
+            onClick={toggle}
+            style={{
+              cursor: "pointer",
+              color: "var(--cs-fg-muted)",
+              display: "flex",
+              alignItems: "center",
+              transition: "color 0.15s",
+              padding: "4px",
+            }}
+            onMouseEnter={e => (e.currentTarget.style.color = "var(--cs-fg)")}
+            onMouseLeave={e => (e.currentTarget.style.color = "var(--cs-fg-muted)")}
+            title={dark ? "Switch to light mode" : "Switch to dark mode"}
+          >
+            {dark ? <Sun size={16} /> : <Moon size={16} />}
+          </Box>
+
+          <Link
+            to="/scan"
+            style={{
+              background: "var(--cs-fg)",
+              color: "var(--cs-bg)",
+              padding: "8px 22px",
+              fontSize: 11,
+              fontWeight: 700,
+              letterSpacing: "0.2em",
+              textTransform: "uppercase",
+              textDecoration: "none",
+              transition: "opacity 0.15s",
+              display: "inline-block",
+            }}
+            onMouseEnter={e => (e.currentTarget.style.opacity = "0.82")}
+            onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
+          >
+            Monitor
+          </Link>
+        </Group>
+      </Box>
+    </Box>
   );
 }
