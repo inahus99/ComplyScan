@@ -323,20 +323,20 @@ export default function LandingPage() {
         </Box>
       </Box>
 
-      {/* ── Dark CTA ────────────────────────────────────────────────────── */}
-      <Box style={{ background: "var(--cs-invert-bg)", padding: "100px 0" }}>
+      {/* ── Light CTA ────────────────────────────────────────────────────── */}
+      <Box style={{ background: "var(--cs-bg-alt)", padding: "100px 0", borderTop: "1px solid var(--cs-border)" }}>
         <Box style={{ maxWidth: 1280, margin: "0 auto", padding: "0 40px" }}>
           <Div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, ease: "easeOut" }}>
             <Group justify="space-between" align="flex-end" wrap="wrap" gap={48}>
               <Box>
-                <Text style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.35em", color: "rgba(255,255,255,0.3)", textTransform: "uppercase", marginBottom: 20 }}>
+                <Text style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.35em", color: "var(--cs-fg-dim)", textTransform: "uppercase", marginBottom: 20 }}>
                   Get Started
                 </Text>
-                <Text style={{ fontFamily: serif, fontStyle: "italic", fontSize: "clamp(40px, 6vw, 72px)", fontWeight: 400, color: "var(--cs-invert-fg)", lineHeight: 1.0, letterSpacing: "-0.025em", marginBottom: 20 }}>
+                <Text style={{ fontFamily: serif, fontStyle: "italic", fontSize: "clamp(40px, 6vw, 72px)", fontWeight: 400, color: "var(--cs-fg)", lineHeight: 1.0, letterSpacing: "-0.025em", marginBottom: 20 }}>
                   Secure your site
                   <br />today.
                 </Text>
-                <Text style={{ fontSize: 15, color: "rgba(255,255,255,0.45)", lineHeight: 1.75, fontWeight: 300, maxWidth: 440 }}>
+                <Text style={{ fontSize: 15, color: "var(--cs-fg-muted)", lineHeight: 1.75, fontWeight: 300, maxWidth: 440 }}>
                   Don't wait for auditors to find gaps in your privacy compliance.
                   Scan your platform for free in under two minutes.
                 </Text>
@@ -346,8 +346,8 @@ export default function LandingPage() {
                   <Link
                     to="/scan"
                     style={{
-                      background: "var(--cs-invert-fg)",
-                      color: "var(--cs-invert-bg)",
+                      background: "var(--cs-fg)",
+                      color: "var(--cs-bg)",
                       padding: "18px 44px",
                       fontSize: 11,
                       fontWeight: 700,
@@ -365,7 +365,7 @@ export default function LandingPage() {
                     Run Compliance Scan <ArrowRight size={15} />
                   </Link>
                 </motion.div>
-                <Text style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.2)", marginTop: 16, textAlign: "center" }}>
+                <Text style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--cs-fg-dim)", marginTop: 16, textAlign: "center" }}>
                   Free · No credit card · Instant results
                 </Text>
               </Box>

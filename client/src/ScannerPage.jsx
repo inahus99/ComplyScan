@@ -60,11 +60,11 @@ function LogLine({ line, idx }) {
         alignItems: "flex-start",
         gap: 10,
         padding: "3px 0",
-        borderBottom: "1px solid rgba(255,255,255,0.03)",
+        borderBottom: "1px solid rgba(0,0,0,0.04)",
       }}
     >
       {time && (
-        <Text style={{ fontSize: 10, color: "rgba(255,255,255,0.25)", fontFamily: "monospace", flexShrink: 0, paddingTop: 1 }}>
+        <Text style={{ fontSize: 10, color: "rgba(0,0,0,0.3)", fontFamily: "monospace", flexShrink: 0, paddingTop: 1 }}>
           {time}
         </Text>
       )}
@@ -83,7 +83,7 @@ function LogLine({ line, idx }) {
           </Text>
         </Box>
       )}
-      <Text style={{ fontSize: 11, color: "rgba(255,255,255,0.65)", fontFamily: "monospace", lineHeight: 1.6, wordBreak: "break-all" }}>
+      <Text style={{ fontSize: 11, color: "rgba(0,0,0,0.65)", fontFamily: "monospace", lineHeight: 1.6, wordBreak: "break-all" }}>
         {content}
       </Text>
     </Box>
@@ -523,7 +523,7 @@ export default function ScannerPage() {
                     style={{
                       height: "100%",
                       width: `${progress}%`,
-                      background: "var(--cs-invert-bg)",
+                      background: "var(--cs-fg)",
                       transition: "width 0.3s ease",
                     }}
                   />
@@ -560,9 +560,9 @@ export default function ScannerPage() {
               <button
                 onClick={exportPDF}
                 style={{
-                  background: "var(--cs-invert-bg)",
-                  border: "1px solid var(--cs-invert-bg)",
-                  color: "var(--cs-invert-fg)",
+                  background: "#ffffff",
+                  border: "1px solid rgba(0,0,0,0.15)",
+                  color: "var(--cs-fg)",
                   padding: "8px 20px",
                   fontSize: 11,
                   fontWeight: 700,
@@ -657,7 +657,8 @@ export default function ScannerPage() {
               style={{
                 height: result ? 560 : 380,
                 overflowY: "auto",
-                background: "#0f1117",
+                background: "#fafafa",
+                borderTop: "1px solid rgba(0,0,0,0.08)",
                 padding: "14px 16px",
               }}
             >
@@ -666,7 +667,7 @@ export default function ScannerPage() {
                   {logs.map((l, i) => <LogLine key={i} line={l} idx={i} />)}
                 </Stack>
               ) : (
-                <Text style={{ fontSize: 11, color: "#334155", fontFamily: "monospace", fontStyle: "italic", textAlign: "center", marginTop: 40 }}>
+                <Text style={{ fontSize: 11, color: "rgba(0,0,0,0.35)", fontFamily: "monospace", fontStyle: "italic", textAlign: "center", marginTop: 40 }}>
                   Logs appear here during scan
                 </Text>
               )}
@@ -676,11 +677,11 @@ export default function ScannerPage() {
             <Box
               style={{
                 padding: "10px 16px",
-                borderTop: "1px solid rgba(255,255,255,0.04)",
-                background: "#0f1117",
+                borderTop: "1px solid rgba(0,0,0,0.04)",
+                background: "#fafafa",
               }}
             >
-              <Text style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.15)" }}>
+              <Text style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(0,0,0,0.25)" }}>
                 {running ? "■ Executing…" : "■ Awaiting Execution…"}
               </Text>
             </Box>
@@ -722,23 +723,23 @@ function ScoreBanner({ result }) {
   return (
     <Box style={{ border: "1px solid rgba(0,0,0,0.1)", background: "var(--cs-bg-card)", overflow: "hidden" }}>
       {/* Header */}
-      <Box style={{ background: "var(--cs-invert-bg)", padding: "18px 24px" }}>
+      <Box style={{ background: "#ffffff", padding: "18px 24px", borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
         <Box style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <Stack gap={2}>
-            <Text style={{ fontSize: 9, fontWeight: 700, color: "rgba(255,255,255,0.4)", letterSpacing: "0.25em", textTransform: "uppercase" }}>
+            <Text style={{ fontSize: 9, fontWeight: 700, color: "rgba(0,0,0,0.4)", letterSpacing: "0.25em", textTransform: "uppercase" }}>
               Compliance Audit Report
             </Text>
             <Text
               component="a"
               href={result.site}
               target="_blank"
-              style={{ fontSize: 13, fontWeight: 600, color: "var(--cs-invert-fg)", wordBreak: "break-all", textDecoration: "none", display: "flex", alignItems: "center", gap: 6 }}
+              style={{ fontSize: 13, fontWeight: 600, color: "var(--cs-fg)", wordBreak: "break-all", textDecoration: "none", display: "flex", alignItems: "center", gap: 6 }}
             >
               {result.site} <ExternalLink size={11} />
             </Text>
           </Stack>
-          <Box style={{ border: "1px solid rgba(255,255,255,0.2)", padding: "5px 16px" }}>
-            <Text style={{ fontSize: 12, fontWeight: 700, color: "var(--cs-invert-fg)", letterSpacing: "0.08em" }}>{scoreLabel}</Text>
+          <Box style={{ border: "1px solid rgba(0,0,0,0.15)", background: "var(--cs-bg-alt)", padding: "5px 16px" }}>
+            <Text style={{ fontSize: 12, fontWeight: 700, color: "var(--cs-fg)", letterSpacing: "0.08em" }}>{scoreLabel}</Text>
           </Box>
         </Box>
       </Box>
@@ -910,7 +911,7 @@ function ViolationTips({ result }) {
             </Stack>
             {(result.violations?.length ?? 0) > 0 && (
               <Box style={{ marginLeft: "auto", background: "#dc2626", padding: "2px 10px" }}>
-                <Text style={{ fontSize: 13, fontWeight: 800, color: "var(--cs-invert-fg)" }}>{result.violations.length}</Text>
+                <Text style={{ fontSize: 13, fontWeight: 800, color: "#ffffff" }}>{result.violations.length}</Text>
               </Box>
             )}
           </Group>
@@ -974,8 +975,8 @@ function ViolationTips({ result }) {
               </Text>
             </Stack>
             {(result.tips?.length ?? 0) > 0 && (
-              <Box style={{ marginLeft: "auto", background: "var(--cs-invert-bg)", padding: "2px 10px" }}>
-                <Text style={{ fontSize: 13, fontWeight: 800, color: "var(--cs-invert-fg)" }}>{result.tips.length}</Text>
+              <Box style={{ marginLeft: "auto", background: "var(--cs-bg)", border: "1px solid rgba(0,0,0,0.1)", padding: "2px 10px" }}>
+                <Text style={{ fontSize: 13, fontWeight: 800, color: "var(--cs-fg)" }}>{result.tips.length}</Text>
               </Box>
             )}
           </Group>
@@ -997,9 +998,9 @@ function ViolationTips({ result }) {
                 onClick={() => setCmpOpen(true)}
                 style={{
                   marginTop: 8,
-                  background: "var(--cs-invert-bg)",
-                  border: "none",
-                  color: "var(--cs-invert-fg)",
+                  background: "#ffffff",
+                  border: "1px solid rgba(0,0,0,0.15)",
+                  color: "var(--cs-fg)",
                   padding: "10px 16px",
                   fontSize: 11,
                   fontWeight: 700,
