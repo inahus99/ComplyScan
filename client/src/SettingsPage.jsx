@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Box, Text, Stack } from "@mantine/core";
-import { Moon, Sun, Trash2, Download, Check } from "lucide-react";
-import { useTheme } from "./context/ThemeContext";
+import { Trash2, Download, Check } from "lucide-react";
 import { ARCHIVE_KEY } from "./ArchivePage";
 import LandingNav from "./components/LandingNav";
 
@@ -73,7 +72,6 @@ function Section({ title, children }) {
 }
 
 export default function SettingsPage() {
-  const { dark, toggle } = useTheme();
   const [historyCount, setHistoryCount] = useState(0);
   const [cleared, setCleared] = useState(false);
   const [exported, setExported] = useState(false);
@@ -124,19 +122,6 @@ export default function SettingsPage() {
       </Box>
 
       <Box style={{ maxWidth: 800, margin: "0 auto", padding: "48px 40px 80px" }}>
-
-        {/* Appearance */}
-        <Section title="Appearance">
-          <SettingRow
-            label="Dark Mode"
-            description="Toggle between light and dark themes. Your preference is saved locally."
-          >
-            <Box style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              {dark ? <Moon size={15} color="var(--cs-fg-muted)" /> : <Sun size={15} color="var(--cs-fg-muted)" />}
-              <Toggle checked={dark} onChange={toggle} />
-            </Box>
-          </SettingRow>
-        </Section>
 
         {/* Data */}
         <Section title="Data & Privacy">

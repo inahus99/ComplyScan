@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Box, Text, Group } from "@mantine/core";
 import { Link, useLocation } from "react-router-dom";
-import { Search, Sun, Moon } from "lucide-react";
-import { useTheme } from "../context/ThemeContext";
+import { Search } from "lucide-react";
 
 const NAV_LINKS = [
   { label: "Reports",    to: "/scan" },
@@ -13,7 +12,6 @@ const NAV_LINKS = [
 
 export default function LandingNav({ showSearch = false }) {
   const [scrolled, setScrolled] = useState(false);
-  const { dark, toggle } = useTheme();
   const location = useLocation();
 
   useEffect(() => {
@@ -105,24 +103,6 @@ export default function LandingNav({ showSearch = false }) {
               <Search size={16} />
             </Box>
           )}
-
-          {/* Dark mode toggle */}
-          <Box
-            onClick={toggle}
-            style={{
-              cursor: "pointer",
-              color: "var(--cs-fg-muted)",
-              display: "flex",
-              alignItems: "center",
-              transition: "color 0.15s",
-              padding: "4px",
-            }}
-            onMouseEnter={e => (e.currentTarget.style.color = "var(--cs-fg)")}
-            onMouseLeave={e => (e.currentTarget.style.color = "var(--cs-fg-muted)")}
-            title={dark ? "Switch to light mode" : "Switch to dark mode"}
-          >
-            {dark ? <Sun size={16} /> : <Moon size={16} />}
-          </Box>
 
           <Link
             to="/scan"

@@ -24,7 +24,3 @@ html, body, #root {
   color: var(--cs-fg);
 }
 
-/* Smooth theme transitions */
-*, *::before, *::after {
-  transition: background-color 0.25s ease, border-color 0.25s ease, color 0.2s ease;
-}
